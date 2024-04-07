@@ -1,0 +1,25 @@
+pipeline {
+    agent any
+
+ stages {
+    stage('Check EKS Access'){
+        steps{
+                withAWS(credentials:'aws-access-cred') {
+                sh 'aws eks update-kubeconfig --region us-east-1 --name kelly'
+                sh 'kubectl get pods -A'      
+    
+            }
+        }
+    }
+    stage('Creation of EKS Namespace'){
+        steps{
+                withAWS(credentials:'aws-access-cred') {
+                sh 'aws eks update-kubeconfig --region us-east-1 --name kelly'
+                sh 'kubectl create namespace development || exit 0'
+                sh 'kubectl create ns production'      
+    
+            }
+        }
+    }
+ }  
+}

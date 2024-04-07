@@ -1,0 +1,37 @@
+https://www.baeldung.com/ops/jenkins-enable-https
+
+snap install --classic certbot
+
+certbot certonly --manual --preferred-challenges=dns --key-type rsa --email shashankaitha8@gmail.com \
+--server https://acme-v02.api.letsencrypt.org/directory --agree-tos -d *.shashankaitha.me
+
+Certificate is saved at: /etc/letsencrypt/live/shashankaitha.me/fullchain.pem
+Key is saved at:         /etc/letsencrypt/live/shashankaitha.me/privkey.pem
+
+
+
+-------
+Convert in to p12 certificate:
+openssl pkcs12 -inkey privkey.pem -in fullchain.pem -export -out certificate.p12
+
+Convert in to jks certificate:
+keytool -importkeystore -srckeystore ./certificate.p12 -srcstoretype pkcs12 -destkeystore jenkinsserver.jks -deststoretype JKS
+
+After installing Jenkins, perform following steps:
+sudo cp jenkinsserver.jks /var/lib/jenkins/
+sudo chown jenkins:jenkins /var/lib/jenkins/jenkinsserver.jks
+
+nano /lib/systemd/system/jenkins.service and add the following.
+#Environment="JENKINS_PORT=80"
+Environment="JENKINS_HTTPS_PORT=8443"
+Environment="JENKINS_HTTPS_KEYSTORE=/var/lib/jenkins/jenkinsserver.jks"
+Environment="JENKINS_HTTPS_KEYSTORE_PASSWORD=Kelly@123"
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+
+echo 'JENKINS_ARGS=" $JENKINS_ARGS --httpsPort=8443  --httpPort=-1 --httpsPrivateKey=/etc/letsencrypt/live/shashankaitha.me/privkey.pem --httpsCertificate=/etc/letsencrypt/live/shashankaitha.me/fullchain.pem"' >> /etc/default/jenkins
+
+sudo systemctl restart jenkins && sudo systemctl status jenkins
+
+sudo systemctl daemon-reload && systemctl restart jenkins && sudo systemctl status jenkins
+service jenkins start
+service jenkins status --no-pager
