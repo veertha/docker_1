@@ -2,9 +2,9 @@ version: "3"
 
 services:
   fruit-service:
-    build: ./product
+    build: product
     volumes:
-      - ./product:/usr/src/app
+      - product:/usr/src/app
     ports:
       - 5001:80
 
