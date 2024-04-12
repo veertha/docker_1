@@ -9,7 +9,7 @@ services:
       - 5001:80
 
   website:
-    image: php-apache
+    image: php
     volumes:
       - ./website:/var/www/html
     ports:
